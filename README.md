@@ -24,18 +24,21 @@ npm run dev
 
 ## GitHub (SSH)
 
-Repo is **private** by default when you create it on GitHub. Clone and push over SSH:
+**Remote (already added):** `git@github.com:saadixsd/social-battery.git`
 
+1. **Create the repo on GitHub** (if it doesn’t exist): [github.com/new](https://github.com/new) → name: `social-battery` → set to **Private** → Create (don’t add README/license).
+2. **SSH access:** Ensure your SSH key is added in GitHub → **Settings** → **SSH and GPG keys**. First time: `ssh-keyscan github.com >> ~/.ssh/known_hosts`.
+3. **Push:**
+   ```bash
+   git push -u origin main
+   ```
+
+**Clone (fresh machine):**
 ```bash
-# Clone
 git clone git@github.com:saadixsd/social-battery.git
 cd social-battery
-
-# After changes: push
-git add -A && git commit -m "Your message" && git push -u origin main
+npm i && npm run dev
 ```
-
-**Make the repo private (if needed):** GitHub → **saadixsd/social-battery** → **Settings** → **Danger Zone** → **Change repository visibility** → **Private**.
 
 ---
 
