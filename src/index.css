@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Parallax — Premium NFC Badge Companion
+   Design System: Ultra-minimal, hardware-companion aesthetic
+   All colors in HSL */
+
+@layer base {
+  :root {
+    /* Core surfaces */
+    --background: 0 0% 98%;
+    --foreground: 220 15% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 15% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 15%;
+
+    /* Primary — subtle, not competing with badge colors */
+    --primary: 220 12% 20%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 220 10% 94%;
+    --secondary-foreground: 220 12% 20%;
+
+    --muted: 220 10% 94%;
+    --muted-foreground: 220 8% 55%;
+
+    --accent: 220 10% 92%;
+    --accent-foreground: 220 12% 20%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 220 10% 90%;
+    --input: 220 10% 90%;
+    --ring: 220 12% 20%;
+
+    --radius: 1rem;
+
+    /* Badge glow colors */
+    --badge-green: 142 76% 45%;
+    --badge-yellow: 45 93% 58%;
+    --badge-red: 0 72% 55%;
+
+    /* Badge glow intensities */
+    --badge-glow-green: 142 76% 45% / 0.4;
+    --badge-glow-yellow: 45 93% 58% / 0.35;
+    --badge-glow-red: 0 72% 55% / 0.4;
+
+    /* Surface overlays */
+    --surface-glass: 0 0% 100% / 0.7;
+    --surface-elevated: 0 0% 100%;
+  }
+
+  .dark {
+    --background: 220 20% 6%;
+    --foreground: 220 10% 92%;
+
+    --card: 220 18% 9%;
+    --card-foreground: 220 10% 92%;
+
+    --popover: 220 18% 9%;
+    --popover-foreground: 220 10% 92%;
+
+    --primary: 220 10% 92%;
+    --primary-foreground: 220 20% 6%;
+
+    --secondary: 220 15% 14%;
+    --secondary-foreground: 220 10% 92%;
+
+    --muted: 220 15% 14%;
+    --muted-foreground: 220 8% 50%;
+
+    --accent: 220 15% 14%;
+    --accent-foreground: 220 10% 92%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 220 15% 16%;
+    --input: 220 15% 16%;
+    --ring: 220 10% 80%;
+
+    /* Badge glow — more vivid on dark */
+    --badge-glow-green: 142 76% 45% / 0.5;
+    --badge-glow-yellow: 45 93% 58% / 0.45;
+    --badge-glow-red: 0 72% 55% / 0.5;
+
+    --surface-glass: 220 20% 8% / 0.8;
+    --surface-elevated: 220 18% 10%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+      'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior: none;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+  }
+
+  /* Prevent pull-to-refresh on mobile for app-like feel */
+  html {
+    overscroll-behavior: none;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
