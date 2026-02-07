@@ -2,8 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Parallax — Premium NFC Badge Companion
-   Design System: Ultra-minimal, hardware-companion aesthetic
+/* Social Battery — NFC badge companion
+   Design system: minimal, hardware-companion aesthetic
    All colors in HSL */
 
 @layer base {
@@ -53,6 +53,11 @@
     /* Surface overlays */
     --surface-glass: 0 0% 100% / 0.7;
     --surface-elevated: 0 0% 100%;
+
+    /* Soft gradient mesh (professional depth) */
+    --gradient-start: 220 20% 98%;
+    --gradient-mid: 220 12% 96%;
+    --gradient-end: 220 15% 94%;
   }
 
   .dark {
@@ -91,12 +96,23 @@
 
     --surface-glass: 220 20% 8% / 0.8;
     --surface-elevated: 220 18% 10%;
+
+    --gradient-start: 220 25% 8%;
+    --gradient-mid: 220 20% 6%;
+    --gradient-end: 220 18% 5%;
   }
 }
 
 @layer base {
   * {
     @apply border-border;
+  }
+
+  html {
+    overscroll-behavior: none;
+    /* Prevent iOS text size adjust on orientation change */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
@@ -109,16 +125,74 @@
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
+    /* Full viewport on mobile (address bar) and desktop */
+    min-height: 100vh;
+    min-height: 100dvh;
   }
 
-  /* Prevent pull-to-refresh on mobile for app-like feel */
-  html {
-    overscroll-behavior: none;
+  /* Remove tap highlight on touch devices */
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Hover styles only when device supports hover (avoid sticky hover on touch) */
+  @media (hover: hover) {
+    button:focus-visible,
+    a:focus-visible,
+    [role="button"]:focus-visible {
+      outline: 2px solid hsl(var(--ring));
+      outline-offset: 2px;
+    }
   }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Safe area for notched devices (iPhone X+, foldables, tablets) */
+  .safe-area-insets {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+  }
+
+  /* Minimum touch target (44px) for mobile accessibility */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Safe-area-aware positioning (use with absolute/fixed) */
+  .safe-top {
+    top: env(safe-area-inset-top, 0px);
+  }
+  .safe-right {
+    right: env(safe-area-inset-right, 0px);
+  }
+  .safe-bottom {
+    bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .safe-left {
+    left: env(safe-area-inset-left, 0px);
+  }
+
+  /* App background — subtle gradient for depth */
+  .bg-app {
+    background: linear-gradient(
+      165deg,
+      hsl(var(--gradient-start)) 0%,
+      hsl(var(--gradient-mid)) 45%,
+      hsl(var(--gradient-end)) 100%
+    );
+  }
+
+  /* Glass surface */
+  .glass {
+    background: hsl(var(--surface-glass));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 }

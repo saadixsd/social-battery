@@ -1,4 +1,4 @@
-const CACHE_NAME = "parallax-v1";
+const CACHE_NAME = "social-battery-v1";
 const ASSETS = ["/", "/index.html"];
 
 self.addEventListener("install", (event) => {

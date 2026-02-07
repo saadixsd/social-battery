@@ -1,9 +1,11 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { LogOut } from "lucide-react";
 import Badge from "./Badge";
 
 interface BadgeControlProps {
   onSyncBadge: (color: string) => Promise<void>;
+  onExit?: () => void;
 }
 
 type BadgeState = "green" | "yellow" | "red";
@@ -25,7 +27,7 @@ function getStateLabel(state: BadgeState): string {
   }
 }
 
-const BadgeControl = ({ onSyncBadge }: BadgeControlProps) => {
+const BadgeControl = ({ onSyncBadge, onExit }: BadgeControlProps) => {
   const [selectedColor, setSelectedColor] = useState<BadgeState>("green");
   const [hasChanged, setHasChanged] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -48,50 +50,101 @@ const BadgeControl = ({ onSyncBadge }: BadgeControlProps) => {
     setTimeout(() => setShowConfirmation(false), 2000);
   }, [hasChanged, syncing, selectedColor, onSyncBadge]);
 
+  const springBouncy = { type: "spring" as const, stiffness: 340, damping: 26 };
+
   return (
     <motion.div
-      className="fixed inset-0 flex flex-col items-center justify-between bg-background px-8 pb-12 pt-20"
+      className="fixed inset-0 flex flex-col items-center justify-between bg-app px-4 pb-8 pt-[max(4rem,calc(1rem+env(safe-area-inset-top)))] sm:px-6 sm:pb-10 sm:pt-24 md:px-8 md:pb-12 md:pt-28 safe-area-insets"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
     >
-      {/* Badge visualization — centered */}
+      {/* Exit — top-left, above other content */}
+      {onExit && (
+        <motion.button
+          type="button"
+          className="absolute z-[50] flex touch-target min-w-0 cursor-pointer items-center gap-2 rounded-full border border-border/50 bg-card/60 px-4 py-2.5 text-sm font-medium text-muted-foreground backdrop-blur-sm transition-colors hover:bg-card hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring active:bg-card left-[max(1rem,env(safe-area-inset-left))] top-[max(1rem,env(safe-area-inset-top))] sm:left-6 sm:top-6"
+          initial={{ opacity: 0, x: -8 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2, duration: 0.3 }}
+          aria-label="Exit to re-pair badge"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onExit();
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <LogOut className="h-4 w-4 pointer-events-none" />
+          <span className="pointer-events-none">Exit</span>
+        </motion.button>
+      )}
+
+      {/* Badge — scales in with spring */}
       <div className="flex flex-1 items-center justify-center">
-        <div className="flex flex-col items-center gap-6">
+        <motion.div
+          className="flex flex-col items-center gap-4 sm:gap-6"
+          initial={{ scale: 0.6, opacity: 0, y: 12 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          transition={{
+            type: "spring",
+            stiffness: 260,
+            damping: 24,
+            delay: 0.08,
+          }}
+        >
           <Badge color={selectedColor} sliderValue={SLIDER_VALUE[selectedColor]} />
 
-          {/* State label */}
+          {/* State label — pop on color change */}
           <motion.p
-            className="text-lg font-light tracking-wide text-foreground"
+            className="text-base font-light tracking-tight text-foreground sm:text-lg"
             key={selectedColor}
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+            initial={{ opacity: 0, y: 8, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={springBouncy}
           >
             {getStateLabel(selectedColor)}
           </motion.p>
-        </div>
+        </motion.div>
       </div>
 
-      {/* Bottom controls */}
-      <div className="w-full max-w-sm space-y-6">
-        {/* Color buttons */}
-        <div className="flex items-center justify-center gap-4">
-          {(["green", "yellow", "red"] as const).map((color) => (
+      {/* Bottom controls — slide up + fade */}
+      <motion.div
+        className="w-full max-w-sm space-y-5 rounded-2xl border border-border/40 bg-card/50 px-4 py-5 shadow-sm backdrop-blur-sm sm:max-w-md sm:space-y-6 sm:px-6 sm:py-6 md:max-w-lg"
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          type: "spring",
+          stiffness: 280,
+          damping: 28,
+          delay: 0.18,
+        }}
+      >
+        {/* Color buttons — staggered with spring */}
+        <div className="flex items-center justify-center gap-4 sm:gap-5">
+          {(["green", "yellow", "red"] as const).map((color, i) => (
             <motion.button
               key={color}
               type="button"
-              className="h-12 w-12 rounded-full border-2 border-background shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-12 w-12 min-w-[48px] rounded-full border-2 border-background shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:h-14 sm:w-14"
               style={{
                 backgroundColor: getThumbColor(SLIDER_VALUE[color]),
                 boxShadow:
                   selectedColor === color
-                    ? `0 0 20px ${getThumbColor(SLIDER_VALUE[color])}, 0 2px 8px rgba(0,0,0,0.2)`
-                    : "0 2px 8px rgba(0,0,0,0.2)",
+                    ? `0 0 24px ${getThumbColor(SLIDER_VALUE[color])}, 0 4px 12px rgba(0,0,0,0.15)`
+                    : "0 4px 12px rgba(0,0,0,0.1)",
               }}
               onClick={() => handleColorSelect(color)}
+              initial={{ opacity: 0, scale: 0.85, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{
+                type: "spring",
+                stiffness: 320,
+                damping: 26,
+                delay: 0.12 + i * 0.07,
+              }}
               whileTap={{ scale: 0.9 }}
-              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              whileHover={{ scale: 1.05 }}
               aria-label={`Set to ${color}`}
               aria-pressed={selectedColor === color}
             />
@@ -102,15 +155,17 @@ const BadgeControl = ({ onSyncBadge }: BadgeControlProps) => {
         <AnimatePresence mode="wait">
           {hasChanged && !showConfirmation && (
             <motion.button
-              className="mx-auto flex items-center gap-2 rounded-full bg-secondary/60 backdrop-blur-md border border-border/50 px-6 py-3 text-sm text-muted-foreground"
+              className="mx-auto flex w-full max-w-[240px] touch-target min-h-[48px] items-center justify-center gap-2.5 rounded-xl border border-border/50 bg-secondary/70 py-3.5 text-sm font-medium text-foreground/90 shadow-sm backdrop-blur-sm transition-colors hover:bg-secondary/90 sm:min-h-0"
               onClick={handleSync}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              initial={{ opacity: 0, y: 10, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -6, scale: 0.98 }}
+              whileTap={{ scale: 0.97 }}
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 360, damping: 26 }}
             >
-              <span className="inline-block h-2 w-2 rounded-full animate-glow-pulse"
+              <span
+                className="h-2 w-2 rounded-full animate-glow-pulse"
                 style={{ backgroundColor: getThumbColor(SLIDER_VALUE[selectedColor]) }}
               />
               Tap badge to update
@@ -119,11 +174,11 @@ const BadgeControl = ({ onSyncBadge }: BadgeControlProps) => {
 
           {showConfirmation && (
             <motion.div
-              className="mx-auto flex items-center gap-2 text-sm text-foreground"
+              className="mx-auto flex items-center gap-2.5 text-sm font-medium text-foreground"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 380, damping: 22 }}
             >
               {/* Animated checkmark */}
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -157,7 +212,7 @@ const BadgeControl = ({ onSyncBadge }: BadgeControlProps) => {
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </motion.div>
 
       {/* Ripple effect on sync */}
       <AnimatePresence>
@@ -170,14 +225,14 @@ const BadgeControl = ({ onSyncBadge }: BadgeControlProps) => {
             <motion.div
               className="rounded-full"
               style={{
-                width: 100,
-                height: 100,
+                width: 120,
+                height: 120,
                 backgroundColor: getThumbColor(SLIDER_VALUE[selectedColor]),
-                opacity: 0.3,
+                opacity: 0.35,
               }}
-              initial={{ scale: 0 }}
-              animate={{ scale: 3, opacity: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
+              initial={{ scale: 0, opacity: 0.4 }}
+              animate={{ scale: 3.5, opacity: 0 }}
+              transition={{ duration: 0.9, ease: "easeOut" }}
             />
           </motion.div>
         )}

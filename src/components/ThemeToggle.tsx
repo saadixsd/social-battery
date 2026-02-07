@@ -9,7 +9,7 @@ interface ThemeToggleProps {
 const ThemeToggle = ({ theme, onToggle }: ThemeToggleProps) => {
   return (
     <motion.button
-      className="fixed top-6 right-6 z-40 flex h-10 w-10 items-center justify-center rounded-full bg-secondary/60 backdrop-blur-md border border-border/50 text-muted-foreground"
+      className="fixed z-40 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full glass border border-border/50 p-2.5 text-muted-foreground shadow-sm [top:max(1rem,env(safe-area-inset-top))] [right:max(1rem,env(safe-area-inset-right))] sm:h-10 sm:w-10 sm:min-h-0 sm:min-w-0 sm:p-0"
       onClick={onToggle}
       whileTap={{ scale: 0.9 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}

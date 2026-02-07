@@ -1,28 +1,39 @@
 import { motion } from "framer-motion";
 import { useEffect } from "react";
 
+const EXIT_DURATION = 0.55;
+
 interface NFCScreenProps {
   isNFCSupported: boolean;
   onStartScan: () => Promise<void>;
   onSimulateTap: () => void;
+  isExiting?: boolean;
+  onExitComplete?: () => void;
 }
 
 const NFCScreen = ({
   isNFCSupported,
   onStartScan,
   onSimulateTap,
+  isExiting = false,
+  onExitComplete,
 }: NFCScreenProps) => {
   useEffect(() => {
-    // Auto-start NFC scan if supported
     if (isNFCSupported) {
       onStartScan();
     }
   }, [isNFCSupported, onStartScan]);
 
+  useEffect(() => {
+    if (isExiting && onExitComplete) {
+      const t = setTimeout(onExitComplete, EXIT_DURATION * 1000 + 50);
+      return () => clearTimeout(t);
+    }
+  }, [isExiting, onExitComplete]);
+
   const handleTap = () => {
     if (isNFCSupported) {
       // NFC scan is already running, the user physically taps
-      // The reading event in the hook will handle it
     } else {
       onSimulateTap();
     }
@@ -30,45 +41,71 @@ const NFCScreen = ({
 
   return (
     <motion.div
-      className="fixed inset-0 flex flex-col items-center justify-center bg-background px-8"
+      className="fixed inset-0 flex flex-col items-center justify-center bg-app px-4 sm:px-6 md:px-8 safe-area-insets"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
     >
-      {/* Pulsing rings */}
-      <div
-        className="relative mb-16 flex items-center justify-center"
+      {/* NFC graphic — scales into center, then product appears */}
+      <motion.div
+        className="relative mb-10 flex items-center justify-center cursor-pointer sm:mb-16"
         onClick={handleTap}
         role="button"
         tabIndex={0}
         aria-label="Tap to connect badge"
+        initial={{ scale: 0.92, opacity: 0 }}
+        animate={{
+          scale: isExiting ? 0 : 1,
+          opacity: isExiting ? 0 : 1,
+        }}
+        transition={
+          isExiting
+            ? { duration: EXIT_DURATION, ease: "easeIn" }
+            : { type: "spring", stiffness: 280, damping: 26 }
+        }
+        whileTap={isExiting ? undefined : { scale: 0.96 }}
       >
-        {/* Outer ring */}
-        <div className="absolute h-48 w-48 rounded-full border border-foreground/5 animate-pulse-ring" />
-
-        {/* Middle ring */}
-        <div className="absolute h-36 w-36 rounded-full border border-foreground/10 animate-pulse-ring-delay" />
-
-        {/* Inner ring */}
+        {/* Outer ring — staggered entrance */}
         <motion.div
-          className="absolute h-24 w-24 rounded-full border-2 border-foreground/15"
-          animate={{ scale: [1, 1.05, 1] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute h-40 w-40 rounded-full border border-foreground/5 animate-pulse-ring sm:h-48 sm:w-48"
+          initial={{ scale: 0.85, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
+        />
+        <motion.div
+          className="absolute h-32 w-32 rounded-full border border-foreground/10 animate-pulse-ring-delay sm:h-36 sm:w-36"
+          initial={{ scale: 0.88, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.45, delay: 0.18, ease: "easeOut" }}
+        />
+        <motion.div
+          className="absolute h-20 w-20 rounded-full border-2 border-foreground/20 sm:h-24 sm:w-24"
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.25, ease: "easeOut" }}
+        />
+        <motion.div
+          className="absolute h-20 w-20 rounded-full border-2 border-foreground/20 pointer-events-none sm:h-24 sm:w-24"
+          initial={{ opacity: 0 }}
+          animate={{ scale: [1, 1.08, 1], opacity: [0.7, 1, 0.7] }}
+          transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut", delay: 0.6 }}
         />
 
-        {/* Center NFC icon */}
+        {/* Center — glass style + spring tap */}
         <motion.div
-          className="relative z-10 flex h-20 w-20 items-center justify-center rounded-full bg-secondary"
-          whileTap={{ scale: 0.95 }}
-          transition={{ type: "spring", stiffness: 400, damping: 25 }}
+          className="relative z-10 flex h-16 w-16 items-center justify-center rounded-full glass border border-border/50 shadow-lg sm:h-20 sm:w-20"
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 320, damping: 24, delay: 0.3 }}
+          whileTap={{ scale: 0.94 }}
+          whileHover={{ scale: 1.02 }}
         >
           <svg
-            width="32"
-            height="32"
+            className="h-7 w-7 text-foreground sm:h-8 sm:w-8"
             viewBox="0 0 24 24"
             fill="none"
-            className="text-foreground"
+            aria-hidden
           >
             {/* NFC-style signal waves */}
             <motion.path
@@ -109,19 +146,26 @@ const NFCScreen = ({
             />
           </svg>
         </motion.div>
-      </div>
+      </motion.div>
 
-      {/* Text */}
+      {/* Text — staggered with graphic */}
       <motion.div
-        className="text-center"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
+        className="text-center max-w-xs px-2 sm:px-0"
+        initial={{ opacity: 0, y: 14 }}
+        animate={{
+          opacity: isExiting ? 0 : 1,
+          y: isExiting ? -14 : 0,
+        }}
+        transition={{
+          duration: isExiting ? EXIT_DURATION * 0.75 : 0.55,
+          delay: isExiting ? 0 : 0.35,
+          ease: "easeOut",
+        }}
       >
-        <h2 className="mb-2 text-xl font-light tracking-wide text-foreground">
-          Tap your Parallax badge
+        <h2 className="mb-2 text-lg font-light tracking-tight text-foreground sm:text-xl">
+          Tap your badge
         </h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground leading-relaxed sm:text-sm">
           {isNFCSupported
             ? "Hold your phone near the badge"
             : "Tap the icon above to connect"}

@@ -8,6 +8,8 @@ interface UseNFCReturn {
   startScan: () => Promise<void>;
   simulateTap: () => void;
   writeColor: (color: string) => Promise<void>;
+  /** Call when user exits to NFC screen so we don’t auto-advance back to control */
+  resetConnection: () => void;
 }
 
 export function useNFC(): UseNFCReturn {
@@ -43,6 +45,10 @@ export function useNFC(): UseNFCReturn {
       setStatus("error");
     }
   }, [isSupported]);
+
+  const resetConnection = useCallback(() => {
+    setStatus("idle");
+  }, []);
 
   const simulateTap = useCallback(() => {
     setStatus("scanning");
@@ -96,5 +102,6 @@ export function useNFC(): UseNFCReturn {
     startScan,
     simulateTap,
     writeColor,
+    resetConnection,
   };
 }
