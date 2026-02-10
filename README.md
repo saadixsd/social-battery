@@ -1,5 +1,7 @@
 # Social Battery
 
+https://social-battery-gces.vercel.app/
+
 A minimal PWA that controls an NFC badge’s **social battery** color (green / yellow / red) from your phone. No accounts, no dashboards—just tap, pick a color, and sync.
 
 **→ Judge / demo flow:** [docs/PARALLAX_JUDGE_DEMO.md](docs/PARALLAX_JUDGE_DEMO.md) — step-by-step product narrative, live demo script, and judge-safe technical summary.
